@@ -16,7 +16,7 @@
   - Public headers use the `.hpp` extension.
   - Write source-code comments and public API documentation in English.
   - Use comments to explain non-obvious constraints and rationale, not to restate the code.
-- Format modified C++ files using the repository's `.clang-format`.
+- Format modified C++ files using `clang-format --style=Google`.
 - Use PascalCase for functions, `kPascalCase` for enumerators, and
   `snake_case` for accessors.
 - Add the project copyright notice and
