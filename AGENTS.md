@@ -16,6 +16,10 @@
   - Public headers use the `.hpp` extension.
   - Write source-code comments and public API documentation in English.
   - Use comments to explain non-obvious constraints and rationale, not to restate the code.
+- Test cases may use concise `Purpose:` and `Coverage:` comments immediately
+  before the test definition to make the tested intent and covered contract
+  visible at a glance. Do not narrate individual assertions or implementation
+  steps.
 - Format modified C++ files using `clang-format --style=Google`.
 - Use PascalCase for functions, `kPascalCase` for enumerators, and
   `snake_case` for accessors.

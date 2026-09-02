@@ -94,7 +94,7 @@ void ExpectWithFieldError(a429link::Word word, std::uint32_t lsb,
 // replacement, range validation, error precedence, and value validation.
 
 // Purpose: Verify the two supported construction paths.
-// Content: Check the default zero value and preservation of an explicit raw
+// Coverage: Check the default zero value and preservation of an explicit raw
 // value.
 TEST(WordTest, ConstructsFromDefaultAndRawValues) {
   EXPECT_EQ(a429link::Word{}.raw(), 0U);
@@ -102,7 +102,7 @@ TEST(WordTest, ConstructsFromDefaultAndRawValues) {
 }
 
 // Purpose: Verify that equality reflects the complete raw word value.
-// Content: Compare equal raw values and two values that differ in their bits.
+// Coverage: Compare equal raw values and two values that differ in their bits.
 TEST(WordTest, ComparesByRawValue) {
   EXPECT_EQ(a429link::Word::FromRaw(0x1234'5678U),
             a429link::Word::FromRaw(0x1234'5678U));
@@ -111,7 +111,7 @@ TEST(WordTest, ComparesByRawValue) {
 }
 
 // Purpose: Verify field extraction across the full 32-bit word.
-// Content: Exercise low, high, middle, and full-width fields while checking
+// Coverage: Exercise low, high, middle, and full-width fields while checking
 // right alignment and isolation from adjacent bits.
 TEST(WordTest, ExtractsAndRightAlignsFields) {
   ExpectExtractsTo(a429link::Word::FromRaw(0x0000'0001U), 1U, 1U, 1U);
@@ -129,7 +129,7 @@ TEST(WordTest, ExtractsAndRightAlignsFields) {
 }
 
 // Purpose: Verify successful field replacement and bit preservation.
-// Content: Set and clear boundary, middle, maximum-width, and maximum-value
+// Coverage: Set and clear boundary, middle, maximum-width, and maximum-value
 // fields, and reject a value one past a field's capacity.
 TEST(WordTest, ReplacesFieldsAndPreservesOtherBits) {
   ExpectWithFieldYields(a429link::Word{}, 1U, 1U, 1U, 0x0000'0001U);
@@ -149,7 +149,7 @@ TEST(WordTest, ReplacesFieldsAndPreservesOtherBits) {
 }
 
 // Purpose: Verify that field replacement follows Word's immutable semantics.
-// Content: Check the returned replacement and confirm that the source word is
+// Coverage: Check the returned replacement and confirm that the source word is
 // unchanged.
 TEST(WordTest, LeavesOriginalUnchangedWhenReplacingField) {
   const auto original = a429link::Word::FromRaw(0xA5A5'F00FU);
@@ -161,7 +161,7 @@ TEST(WordTest, LeavesOriginalUnchangedWhenReplacingField) {
 }
 
 // Purpose: Verify rejection of every invalid field-range category.
-// Content: Exercise zero, above-limit, oversized runtime, and end-overflowing
+// Coverage: Exercise zero, above-limit, oversized runtime, and end-overflowing
 // inputs through both extraction and replacement APIs.
 TEST(WordTest, RejectsInvalidFieldRanges) {
   using enum a429link::WordError;
@@ -185,8 +185,8 @@ TEST(WordTest, RejectsInvalidFieldRanges) {
 }
 
 // Purpose: Verify the documented order of validation failures.
-// Content: Combine invalid positions, widths, and values to ensure range errors
-// take precedence according to the public contract.
+// Coverage: Combine invalid positions, widths, and values to ensure range
+// errors take precedence according to the public contract.
 TEST(WordTest, ReportsValidationErrorsInContractOrder) {
   using enum a429link::WordError;
 
@@ -202,7 +202,7 @@ TEST(WordTest, ReportsValidationErrorsInContractOrder) {
 }
 
 // Purpose: Verify that replacement values must fit the requested field width.
-// Content: Try the first unrepresentable values for one-bit and eight-bit
+// Coverage: Try the first unrepresentable values for one-bit and eight-bit
 // fields and check for kValueOutOfRange.
 TEST(WordTest, RejectsValuesThatDoNotFitTheField) {
   ExpectWithFieldError(a429link::Word{}, 1U, 1U, 2U,
