@@ -27,38 +27,40 @@ Consumers link the `a429link::a429link` interface target.
 ## Minimal example
 
 ```cpp
-#include <a429link/word.hpp>
+#include <a429link/field.hpp>
 
 #include <cstdint>
 
 int main() {
+  using EquipmentId = a429link::Field<9U, 8U>;
+
   const auto word = a429link::Word::FromRaw(0x1234'5678U);
 
   // Public bit positions are 1-origin. Replace raw bits 8..15.
-  const auto updated = word.WithField(9U, 8U, 0xABU);
+  const auto updated = EquipmentId::WithValue(word, 0xABU);
   if (!updated.has_value()) {
     return 1;
   }
 
-  const auto field = updated.value().Extract(9U, 8U);
-  if (!field.has_value()) {
-    return 1;
-  }
-
-  return field.value() == 0xABU ? 0 : 1;
+  return EquipmentId::Extract(updated.value()) == 0xABU ? 0 : 1;
 }
 ```
 
-`Extract()` and `WithField()` return `std::expected` errors for invalid bit
-ranges or values that do not fit the requested width. `WithField()` returns a
-new `Word`; it does not modify the original value.
+`Field<Lsb, Width>` defines a reusable bit range at compile time. Invalid ranges
+are rejected by its template constraints. `WithValue()` returns a
+`std::expected` error when a value does not fit the configured width and returns
+a new `Word` on success; it does not modify the original value.
+
+For ranges selected at runtime, `Word::Extract()` and `Word::WithField()` accept
+an LSB and width directly and report invalid ranges with `std::expected`.
 
 ## Current scope
 
-This initial slice provides only the immutable `a429link::Word` 32-bit value
-type, raw-value conversion, and validated extraction and replacement of
-contiguous bit fields. Bit positions are 1-origin, and `raw()` represents a
-host integer value rather than a byte or wire format.
+This initial slice provides the immutable `a429link::Word` 32-bit value type,
+raw-value conversion, validated extraction and replacement of contiguous bit
+fields, and the compile-time configured `a429link::Field` helper. Bit positions
+are 1-origin, and `raw()` represents a host integer value rather than a byte or
+wire format.
 
 A429-specific layouts and meanings such as Label, SDI, data fields, SSM, and
 Parity are not defined. Numeric codecs, parity handling, byte serialization,
