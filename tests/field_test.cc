@@ -40,6 +40,9 @@ static_assert(!DefinesField<32U, 2U>);
 
 static_assert(LowByteField::kLsb == 1U);
 static_assert(LowByteField::kWidth == 8U);
+static_assert(noexcept(LowByteField::Extract(a429link::Word{})));
+static_assert(noexcept(LowByteField::WithValue(a429link::Word{},
+                                               std::uint32_t{0})));
 static_assert(ExtractsTo<MiddleField>(a429link::Word::FromRaw(0x0000'05A0U),
                                       0x2DU));
 static_assert(WithValueYields<LowByteField>(

@@ -18,7 +18,7 @@ class Field final {
   static constexpr std::uint32_t kLsb = Lsb;
   static constexpr std::uint32_t kWidth = Width;
 
-  constexpr Field() noexcept = default;
+  Field() = delete;
 
   [[nodiscard]]
   static constexpr std::uint32_t Extract(Word word) noexcept {
@@ -30,8 +30,6 @@ class Field final {
       Word word, std::uint32_t value) noexcept {
     return word.WithField(Lsb, Width, value);
   }
-
-  friend constexpr bool operator==(Field, Field) noexcept = default;
 };
 
 }  // namespace a429link
