@@ -13,7 +13,7 @@ namespace a429link::a429 {
 
 [[nodiscard]]
 constexpr bool HasOddParity(Word word) noexcept {
-  return (std::popcount(word.raw()) % 2U) == 1U;
+  return (std::popcount(word.raw()) % 2) == 1;
 }
 
 [[nodiscard]]
