@@ -32,6 +32,10 @@
   fields, codecs, serialization, and transports.
 - Do not add public APIs solely to make testing easier.
 
+## Version control
+
+- Start every commit subject with an appropriate Gitmoji emoji.
+
 ## Verification
 
 For changes affecting the C++ library, run:
