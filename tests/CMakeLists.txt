@@ -33,6 +33,19 @@ target_link_libraries(
         GTest::gtest_main
 )
 
+add_executable(
+    a429link_a429_test
+    a429/parity_test.cc
+    a429/standard_layout_test.cc
+)
+target_link_libraries(
+    a429link_a429_test
+    PRIVATE
+        a429link::a429link
+        GTest::gtest_main
+)
+
 include(GoogleTest)
 gtest_discover_tests(a429link_word_test TEST_PREFIX "a429link.word.")
 gtest_discover_tests(a429link_field_test TEST_PREFIX "a429link.field.")
+gtest_discover_tests(a429link_a429_test TEST_PREFIX "a429link.a429.")
