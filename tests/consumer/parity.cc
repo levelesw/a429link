@@ -3,7 +3,6 @@
 
 #include "a429link/a429/parity.hpp"
 
-a429link::Word ApplyParity(a429link::Word word)
-{
-    return a429link::a429::WithOddParity(word);
+a429link::Word ApplyParity(a429link::Word word) {
+  return a429link::a429::WithOddParity(word);
 }

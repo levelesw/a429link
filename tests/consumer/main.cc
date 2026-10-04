@@ -5,13 +5,11 @@
 
 a429link::Word ApplyParity(a429link::Word word);
 
-int main()
-{
+int main() {
   using Label = a429link::a429::StandardLayout::Label;
 
   const auto word = Label::WithValue(a429link::Word{}, 0213U);
-  if (!word.has_value())
-  {
+  if (!word.has_value()) {
     return 1;
   }
 
