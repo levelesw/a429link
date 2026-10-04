@@ -49,3 +49,22 @@ include(GoogleTest)
 gtest_discover_tests(a429link_word_test TEST_PREFIX "a429link.word.")
 gtest_discover_tests(a429link_field_test TEST_PREFIX "a429link.field.")
 gtest_discover_tests(a429link_a429_test TEST_PREFIX "a429link.a429.")
+
+option(
+    A429LINK_WARNINGS_AS_ERRORS
+    "Treat warnings in a429link tests as errors"
+    OFF
+)
+
+if(A429LINK_WARNINGS_AS_ERRORS
+   AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    foreach(test_target IN ITEMS
+            a429link_word_test
+            a429link_field_test
+            a429link_a429_test)
+        target_compile_options(
+            ${test_target}
+            PRIVATE -Wall -Wextra -Wpedantic -Werror
+        )
+    endforeach()
+endif()

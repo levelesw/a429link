@@ -1,39 +1,112 @@
-# This starter workflow is for a CMake project running on a single platform. There is a different starter workflow if you need cross-platform coverage.
-# See: https://github.com/actions/starter-workflows/blob/main/ci/cmake-multi-platform.yml
-name: CMake on a single platform
+# Copyright 2026 levelesw
+# SPDX-License-Identifier: BSD-2-Clause
+
+name: C++ CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [main]
   pull_request:
-    branches: [ "main" ]
+    branches: [main]
+  workflow_dispatch:
 
-env:
-  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
-  BUILD_TYPE: Release
+permissions:
+  contents: read
 
 jobs:
   build:
-    # The CMake configure and build commands are platform agnostic and should work equally well on Windows or Mac.
-    # You can convert this to a matrix build if you need cross-platform coverage.
-    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
-    runs-on: ubuntu-latest
+    name: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      CC: gcc-13
+      CXX: g++-13
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Configure CMake
-      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
-      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+      - name: Check PR whitespace
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: git diff --check "$BASE_SHA" HEAD
 
-    - name: Build
-      # Build your program with the given configuration
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+      - name: Check C++ formatting
+        run: |
+          git ls-files -z -- '*.hpp' '*.cc' |
+            xargs -0 -r clang-format-18 \
+              --style=Google --dry-run --Werror
 
-    - name: Test
-      working-directory: ${{github.workspace}}/build
-      # Execute tests defined by the CMake configuration.
-      # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
-      run: ctest -C ${{env.BUILD_TYPE}}
+      - name: Configure
+        run: >
+          cmake -S . -B build
+          -DCMAKE_BUILD_TYPE=Release
+          -DBUILD_TESTING=ON
+          -DBUILD_GMOCK=OFF
+          -DA429LINK_WARNINGS_AS_ERRORS=ON
+          -DCMAKE_DISABLE_FIND_PACKAGE_GTest=ON
 
+      - name: Build
+        run: cmake --build build --parallel 2
+
+      - name: Test
+        run: >
+          ctest --test-dir build
+          --output-on-failure --no-tests=error
+
+      - name: Configure consumer
+        run: >
+          cmake -S tests/consumer -B build-consumer
+          -DCMAKE_BUILD_TYPE=Release
+          -DBUILD_TESTING=OFF
+          -DCMAKE_DISABLE_FIND_PACKAGE_GTest=ON
+          -DFETCHCONTENT_FULLY_DISCONNECTED=ON
+
+      - name: Build consumer
+        run: cmake --build build-consumer --parallel 2
+
+      - name: Run consumer
+        run: ./build-consumer/a429link_consumer
+
+  clang-ubsan:
+    name: clang-ubsan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      CC: clang-18
+      CXX: clang++-18
+      CXXFLAGS: >-
+        -stdlib=libc++
+        -fsanitize=undefined,float-cast-overflow
+        -fno-sanitize-recover=all
+      LDFLAGS: >-
+        -stdlib=libc++
+        -fsanitize=undefined,float-cast-overflow
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Clang and libc++
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            clang-18 libc++-18-dev libc++abi-18-dev
+
+      - name: Configure
+        run: >
+          cmake -S . -B build
+          -DCMAKE_BUILD_TYPE=Debug
+          -DBUILD_TESTING=ON
+          -DBUILD_GMOCK=OFF
+          -DA429LINK_WARNINGS_AS_ERRORS=ON
+          -DCMAKE_DISABLE_FIND_PACKAGE_GTest=ON
+
+      - name: Build
+        run: cmake --build build --parallel 2
+
+      - name: Test
+        run: >
+          ctest --test-dir build
+          --output-on-failure --no-tests=error
